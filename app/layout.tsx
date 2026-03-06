@@ -22,13 +22,13 @@ export const metadata: Metadata = {
     siteName: 'JuiceMe',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: '/og-juice.jpg', width: 1200, height: 630, alt: 'JuiceMe - Smart Juice Recipes' }],
+    images: [{ url: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=1200&q=80&fit=crop', width: 1200, height: 630, alt: 'Fresh green juice ingredients' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'JuiceMe - Smart Juice Recipes',
-    description: 'Find juice recipes based on what\'s in your fridge.',
-    images: ['/og-juice.jpg'],
+    title: 'JuiceMe — Find Juice Recipes by Ingredient',
+    description: 'The juice recipe finder that starts with your ingredients, not ours. Pick what you have. Get exactly what to make.',
+    images: ['https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=1200&q=80&fit=crop'],
   },
 };
 
