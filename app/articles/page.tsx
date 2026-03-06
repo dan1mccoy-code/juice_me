@@ -17,10 +17,9 @@ export const metadata: Metadata = {
 
 const ALL_TAGS: ArticleTag[] = ['Recipes', 'Health & Nutrition', 'Kitchen Tools'];
 
-export default function ArticlesPage({ searchParams }: { searchParams: Promise<{ tag?: string }> | { tag?: string } }) {
-  // Support both Next.js 14 sync and async searchParams
-  const params = searchParams instanceof Promise ? null : searchParams;
-  const activeTag = params?.tag as ArticleTag | undefined;
+export default async function ArticlesPage({ searchParams }: { searchParams: Promise<{ tag?: string }> }) {
+  const { tag } = await searchParams;
+  const activeTag = tag as ArticleTag | undefined;
 
   const filtered = activeTag
     ? articles.filter(a => a.tags.includes(activeTag))
