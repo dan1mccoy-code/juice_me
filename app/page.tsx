@@ -50,7 +50,7 @@ export default function Home() {
       {/* The Two Paths */}
       <div className="w-full space-y-4">
         <Link 
-          href="/ingredients" 
+          href="/find"
           className="block w-full bg-green-500 hover:bg-green-600 text-white text-center font-medium text-lg py-4 rounded-2xl shadow-sm transition-colors"
         >
           I have ingredients
