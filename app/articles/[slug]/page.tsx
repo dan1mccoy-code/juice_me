@@ -2,8 +2,9 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { articles, getArticleBySlug } from '@/content/articles';
+import { articles, getArticleBySlug, getRelatedArticles } from '@/content/articles';
 import AdUnit from '@/components/AdUnit';
+import { supabase } from '@/lib/supabase';
 
 export async function generateStaticParams() {
   return articles.map((a) => ({ slug: a.slug }));
@@ -39,6 +40,18 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   const { slug } = await params;
   const article = getArticleBySlug(slug);
   if (!article) notFound();
+
+  const relatedArticles = getRelatedArticles(article.relatedArticleSlugs);
+
+  // Fetch related recipes from Supabase
+  let relatedRecipes: any[] = [];
+  if (article.relatedRecipeSlugs.length > 0) {
+    const { data } = await supabase
+      .from('recipes')
+      .select('title, slug, source_type, rating_count, rating_sum, category')
+      .in('slug', article.relatedRecipeSlugs);
+    relatedRecipes = data ?? [];
+  }
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -93,7 +106,14 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             {new Date(article.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
           </p>
           <h1 className="text-3xl font-black text-gray-900 leading-tight mb-3">{article.title}</h1>
-          <p className="text-gray-500 text-sm leading-relaxed">{article.hook}</p>
+          <p className="text-gray-500 text-sm leading-relaxed mb-4">{article.hook}</p>
+          <div className="flex flex-wrap gap-2">
+            {article.tags.map(tag => (
+              <Link key={tag} href={`/articles?tag=${encodeURIComponent(tag)}`} className="text-[10px] font-bold uppercase tracking-widest text-green-700 bg-green-50 border border-green-100 px-3 py-1 rounded-full hover:bg-green-100 transition-colors">
+                {tag}
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* Sections */}
@@ -141,6 +161,50 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             return null;
           })}
         </div>
+
+        {/* Related Recipes */}
+        {relatedRecipes.length > 0 && (
+          <div className="mt-10 mb-6">
+            <h2 className="text-xl font-bold mb-4">Try These Recipes</h2>
+            <div className="space-y-3">
+              {relatedRecipes.map((r: any) => {
+                const avg = r.rating_count > 0 ? (r.rating_sum / r.rating_count).toFixed(1) : '0.0';
+                return (
+                  <Link key={r.slug} href={`/recipe/${r.slug}`} className="flex items-center justify-between bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:border-green-200 active:scale-[0.98] transition-all">
+                    <div>
+                      <p className="font-bold text-gray-900 text-sm leading-tight mb-1">{r.title}</p>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs">⭐</span>
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{avg} ({r.rating_count})</span>
+                      </div>
+                    </div>
+                    <span className="text-gray-300 font-bold flex-shrink-0 ml-4">→</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Related Articles */}
+        {relatedArticles.length > 0 && (
+          <div className="mb-6">
+            <h2 className="text-xl font-bold mb-4">Keep Reading</h2>
+            <div className="space-y-3">
+              {relatedArticles.map(a => (
+                <Link key={a.slug} href={`/articles/${a.slug}`} className="flex gap-4 items-center bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:border-green-200 active:scale-[0.98] transition-all">
+                  <div className="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden">
+                    <img src={a.heroImage} alt={a.heroAlt} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-gray-900 text-sm leading-tight line-clamp-2">{a.title}</p>
+                  </div>
+                  <span className="text-gray-300 font-bold flex-shrink-0">→</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Ad Unit */}
         <div className="w-full mt-10 mb-8">

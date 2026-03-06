@@ -15,6 +15,9 @@
 //   heroImage: 'https://images.unsplash.com/...',   // 800x400+ landscape photo URL
 //   heroAlt: 'Descriptive alt text for the image',
 //   hook: 'One or two sentences shown on the article card and below the title.',
+//   tags: ['Recipes'],                              // one or more: 'Recipes' | 'Health & Nutrition' | 'Kitchen Tools'
+//   relatedRecipeSlugs: ['slug-one', 'slug-two'],   // 2–3 recipe slugs from the database
+//   relatedArticleSlugs: ['other-article-slug'],    // 1–3 article slugs from this file
 //   sections: [
 //     { type: 'h2', text: 'Section Heading' },
 //     { type: 'body', text: 'Paragraph of text.' },
@@ -23,6 +26,8 @@
 //   ],
 // },
 // ─────────────────────────────────────────────────────────────
+
+export type ArticleTag = 'Recipes' | 'Health & Nutrition' | 'Kitchen Tools';
 
 export type ArticleSection =
   | { type: 'h2'; text: string }
@@ -38,6 +43,9 @@ export interface Article {
   heroImage: string;
   heroAlt: string;
   hook: string;
+  tags: ArticleTag[];
+  relatedRecipeSlugs: string[];
+  relatedArticleSlugs: string[];
   sections: ArticleSection[];
 }
 
@@ -51,6 +59,9 @@ export const articles: Article[] = [
     heroImage: 'https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=800&q=80&fit=crop',
     heroAlt: 'Colorful fresh juice drinks made from fruits and vegetables',
     hook: 'New to juicing and not sure where to start? These five combinations are easy to find, hard to mess up, and genuinely delicious.',
+    tags: ['Recipes'],
+    relatedRecipeSlugs: ['apple-carrot-ginger-juice', 'pineapple-spinach-detox', 'watermelon-mint-refresher'],
+    relatedArticleSlugs: ['what-to-grab-from-the-produce-aisle'],
     sections: [
       { type: 'h2', text: '1. Apple, Carrot, Ginger' },
       { type: 'body', text: 'This is the gateway combo of juicing. Naturally sweet from the apple and carrot, with just enough heat from the ginger to feel like it\'s doing something. Use 2 apples, 3 carrots, and a half-inch of ginger. Beginner-friendly and universally crowd-pleasing.' },
@@ -74,6 +85,9 @@ export const articles: Article[] = [
     heroImage: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=800&q=80&fit=crop',
     heroAlt: 'Fresh green vegetables and fruits arranged in a produce section',
     hook: 'Standing in front of a wall of vegetables with no idea what to grab? We\'ve been there. Here\'s your produce aisle cheat sheet.',
+    tags: ['Recipes', 'Health & Nutrition'],
+    relatedRecipeSlugs: ['green-apple-cucumber-cleanser', 'kale-lemon-ginger-boost', 'spinach-pineapple-green'],
+    relatedArticleSlugs: ['best-juicing-combinations-for-beginners'],
     sections: [
       { type: 'h2', text: 'Start With a Green Base' },
       { type: 'body', text: 'Every great green juice needs a leafy foundation. Reach for a bunch of kale or a bag of spinach — spinach is milder and more forgiving if you\'re new to green juices. One large handful is enough for a single serving.' },
@@ -91,4 +105,17 @@ export const articles: Article[] = [
 
 export function getArticleBySlug(slug: string): Article | undefined {
   return articles.find(a => a.slug === slug);
+}
+
+export function getArticlesByTag(tag: ArticleTag): Article[] {
+  return articles.filter(a => a.tags.includes(tag));
+}
+
+export function getRelatedArticles(slugs: string[]): Article[] {
+  return slugs.map(s => articles.find(a => a.slug === s)).filter(Boolean) as Article[];
+}
+
+// Returns all articles that link to a given recipe slug
+export function getArticlesForRecipe(recipeSlug: string): Article[] {
+  return articles.filter(a => a.relatedRecipeSlugs.includes(recipeSlug));
 }
