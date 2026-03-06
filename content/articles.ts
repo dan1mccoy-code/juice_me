@@ -60,7 +60,7 @@ export const articles: Article[] = [
     heroAlt: 'Colorful fresh juice drinks made from fruits and vegetables',
     hook: 'New to juicing and not sure where to start? These five combinations are easy to find, hard to mess up, and genuinely delicious.',
     tags: ['Recipes'],
-    relatedRecipeSlugs: ['carrot-ginger-classic', 'watermelon-cooler', 'tropical-green'],
+    relatedRecipeSlugs: ['apple-carrot-ginger', 'watermelon-cooler', 'tropical-green'],
     relatedArticleSlugs: ['what-to-grab-from-the-produce-aisle'],
     sections: [
       { type: 'h2', text: '1. Apple, Carrot, Ginger' },
@@ -86,7 +86,7 @@ export const articles: Article[] = [
     heroAlt: 'Fresh green vegetables and fruits arranged in a produce section',
     hook: 'Standing in front of a wall of vegetables with no idea what to grab? We\'ve been there. Here\'s your produce aisle cheat sheet.',
     tags: ['Recipes', 'Health & Nutrition'],
-    relatedRecipeSlugs: ['green-apple-detox', 'kale-kickstart', 'lemon-ginger-blast'],
+    relatedRecipeSlugs: ['cucumber-apple-mint', 'kale-kickstart', 'lemon-ginger-blast'],
     relatedArticleSlugs: ['best-juicing-combinations-for-beginners'],
     sections: [
       { type: 'h2', text: 'Start With a Green Base' },
