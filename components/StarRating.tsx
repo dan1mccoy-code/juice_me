@@ -61,11 +61,11 @@ export default function StarRating({ recipeId, initialRating, totalRatings }: St
       </div>
       
       <div className="flex flex-col">
-        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">
           {hasRated ? "Thanks for rating!" : "Rate this juice"}
         </span>
         {!hasRated && (
-          <span className="text-[10px] font-bold text-gray-300">
+          <span className="text-[10px] font-bold text-gray-500">
             {totalRatings} {totalRatings === 1 ? 'Rating' : 'Ratings'} • {initialRating.toFixed(1)} Avg
           </span>
         )}

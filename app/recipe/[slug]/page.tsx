@@ -6,8 +6,9 @@ import Link from 'next/link';
 import StarRating from '@/components/StarRating';
 
 interface RecipeDetail {
-  id: string; 
+  id: string;
   title: string;
+  description: string;
   instructions: string[];
   source_type: string;
   rating_count: number;
@@ -48,6 +49,7 @@ export default function RecipePage({ params }: { params: Promise<{ slug: string 
           .select(`
             id,
             title,
+            description,
             instructions,
             source_type,
             rating_count,
@@ -65,8 +67,9 @@ export default function RecipePage({ params }: { params: Promise<{ slug: string 
         if (error) throw error;
 
         const formatted: RecipeDetail = {
-          id: data.id, 
+          id: data.id,
           title: data.title,
+          description: data.description || '',
           instructions: Array.isArray(data.instructions) ? data.instructions : [],
           source_type: data.source_type,
           rating_count: Number(data.rating_count) || 0,
@@ -124,10 +127,14 @@ export default function RecipePage({ params }: { params: Promise<{ slug: string 
       />
       
       <div className="w-full mb-8 mt-4 text-left">
-        <h1 className="text-3xl font-black text-gray-900 leading-tight mb-3 italic">
+        <h1 className="text-3xl font-black text-gray-900 leading-tight mb-3">
           {recipe.title}
         </h1>
         
+        {recipe.description && (
+          <p className="text-gray-600 text-sm leading-relaxed mb-4">{recipe.description}</p>
+        )}
+
         <div className="flex flex-wrap items-center gap-2 mb-6">
           <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full border flex items-center gap-1 ${
             recipe.source_type === 'human' 
@@ -152,23 +159,23 @@ export default function RecipePage({ params }: { params: Promise<{ slug: string 
       </div>
 
       <div className="w-full bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
-        <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 italic">Ingredients</h2>
+        <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4 italic">Ingredients</h2>
         <ul className="space-y-4">
           {recipe.ingredients.length > 0 ? (
             recipe.ingredients.map((ing, i) => (
               <li key={i} className="flex justify-between items-center border-b border-gray-50 pb-2 last:border-0">
                 <span className="text-gray-800 font-semibold">{ing.name}</span>
-                <span className="text-gray-400 text-sm">{ing.quantity_display}</span>
+                <span className="text-gray-500 text-sm">{ing.quantity_display}</span>
               </li>
             ))
           ) : (
-            <li className="text-gray-400 text-xs italic">No ingredients listed for this recipe.</li>
+            <li className="text-gray-500 text-xs italic">No ingredients listed for this recipe.</li>
           )}
         </ul>
       </div>
 
       <div className="w-full bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-12">
-        <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 italic">Instructions</h2>
+        <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4 italic">Instructions</h2>
         <div className="space-y-6">
           {recipe.instructions.map((step, i) => (
             <div key={i} className="flex gap-4">
@@ -181,7 +188,7 @@ export default function RecipePage({ params }: { params: Promise<{ slug: string 
         </div>
       </div>
       
-      <Link href="/" className="text-gray-300 font-bold text-xs uppercase tracking-widest hover:text-green-500 transition-colors mb-8">
+      <Link href="/" className="text-gray-500 font-bold text-xs uppercase tracking-widest hover:text-green-500 transition-colors mb-8">
         ← Back to Fridge
       </Link>
     </main>
