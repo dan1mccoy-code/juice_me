@@ -133,6 +133,21 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                 </p>
               );
             }
+            if (section.type === 'recipe') {
+              return (
+                <Link
+                  key={i}
+                  href={`/recipe/${section.slug}`}
+                  className="flex items-center justify-between bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:border-green-200 active:scale-[0.98] transition-all"
+                >
+                  <div className="flex-1 min-w-0 pr-3">
+                    <p className="font-bold text-gray-900 text-sm leading-tight mb-1">{section.title}</p>
+                    <p className="text-gray-500 text-xs leading-relaxed">{section.description}</p>
+                  </div>
+                  <span className="text-green-500 font-bold flex-shrink-0 text-xs uppercase tracking-widest">Recipe →</span>
+                </Link>
+              );
+            }
             if (section.type === 'tip') {
               return (
                 <div key={i} className="bg-green-50 border border-green-100 rounded-2xl px-5 py-4">
