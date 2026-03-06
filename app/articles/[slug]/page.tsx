@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { articles, getArticleBySlug } from '@/content/articles';
+import AdUnit from '@/components/AdUnit';
 
 export async function generateStaticParams() {
   return articles.map((a) => ({ slug: a.slug }));
@@ -141,9 +142,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           })}
         </div>
 
-        {/* Ad Placeholder */}
-        <div className="w-full h-[100px] bg-gray-100 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center mt-10 mb-8">
-          <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">Advertisement</p>
+        {/* Ad Unit */}
+        <div className="w-full mt-10 mb-8">
+          <AdUnit />
         </div>
 
         {/* Footer nav */}

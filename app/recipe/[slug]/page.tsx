@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import StarRating from '@/components/StarRating';
 import { notFound } from 'next/navigation';
+import AdUnit from '@/components/AdUnit';
 
 const GET_RECIPE_TAGS = (ingredients: string[]) => {
   const boostMap = [
@@ -248,9 +249,9 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
         </div>
       </div>
 
-      {/* Ad Placeholder */}
-      <div className="w-full h-[100px] bg-gray-100 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center mb-8">
-        <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">Advertisement</p>
+      {/* Ad Unit */}
+      <div className="w-full mb-8">
+        <AdUnit />
       </div>
 
       <Link href="/ingredients" className="text-gray-500 font-bold text-xs uppercase tracking-widest hover:text-green-500 transition-colors mb-8">
