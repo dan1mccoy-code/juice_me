@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import Nav from '@/components/nav';
 import './globals.css';
 
@@ -41,6 +42,13 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
       </head>
       <body className="bg-gray-50 text-gray-900 min-h-screen">
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-PV8EPGJEH1" strategy="afterInteractive" />
+        <Script id="ga-init" strategy="afterInteractive">{`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-PV8EPGJEH1');
+        `}</Script>
         <Nav />
         {children}
       </body>
