@@ -4,8 +4,8 @@ compatibility_date = "2024-12-30"
 compatibility_flags = ["nodejs_compat"]
 
 routes = [
-  { pattern = "juiceme.app/*", custom_domain = true },
-  { pattern = "www.juiceme.app/*", custom_domain = true },
+  { pattern = "juiceme.app", custom_domain = true },
+  { pattern = "www.juiceme.app", custom_domain = true },
 ]
 
 [assets]
