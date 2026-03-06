@@ -79,18 +79,20 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const description = recipe.description ||
     `How to make ${recipe.title} — a healthy juice recipe with ${recipe.ingredients.slice(0, 3).map(i => i.name).join(', ')}.`;
 
+  const fullTitle = `${recipe.title} Juice Recipe — JuiceMe`;
+
   return {
-    title: recipe.title,
+    title: { absolute: fullTitle },
     description,
     alternates: { canonical: `/recipe/${slug}` },
     openGraph: {
-      title: recipe.title,
+      title: fullTitle,
       description,
       url: `/recipe/${slug}`,
       type: 'article',
     },
     twitter: {
-      title: recipe.title,
+      title: fullTitle,
       description,
     },
   };
