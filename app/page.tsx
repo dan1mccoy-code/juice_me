@@ -44,8 +44,7 @@ export default function Home() {
         <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-4">
           <span className="text-4xl">🥕</span> 
         </div>
-        <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Let's Juice!</h1>
-        <p className="text-gray-500 mt-2 text-center">Fresh ideas for what's in your fridge.</p>
+        <h1 className="text-3xl font-black text-gray-900 tracking-tight text-center leading-tight">Tell us what you have.<br />We'll help you make it juice.</h1>
       </div>
 
       {/* The Two Paths */}

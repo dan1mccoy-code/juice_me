@@ -7,10 +7,10 @@ import './globals.css';
 export const metadata: Metadata = {
   metadataBase: new URL('https://juiceme.app'),
   title: {
-    default: 'JuiceMe | Smart Juice Recipes from Your Fridge',
+    default: 'JuiceMe — Find Juice Recipes by Ingredient',
     template: '%s | JuiceMe',
   },
-  description: 'Find the perfect juice recipe based on the ingredients you have or your health goals. 100+ healthy juice recipes sorted by ingredient.',
+  description: 'The juice recipe finder that starts with your ingredients, not ours. Pick what you have. Get exactly what to make.',
   keywords: ['juice recipes', 'juicing', 'healthy drinks', 'juice ingredients', 'health boost', 'green juice', 'fruit juice', 'wellness drinks'],
   alternates: {
     canonical: '/',
