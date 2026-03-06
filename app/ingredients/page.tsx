@@ -1,10 +1,7 @@
 "use client";
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import SearchBar from '@/components/SearchBar';
-
-type IngredientFilter = 'All' | 'Fruits' | 'Veggies' | 'Boosts';
 
 const FRUITS = [
   { name: 'Apple', icon: '🍏' },
@@ -35,155 +32,71 @@ const BOOSTS = [
   { name: 'Turmeric', icon: '🟡' },
 ];
 
-const FILTERS: IngredientFilter[] = ['All', 'Fruits', 'Veggies', 'Boosts'];
-
 export default function IngredientsPage() {
-  const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
-  const [activeFilter, setActiveFilter] = useState<IngredientFilter>('All');
   const router = useRouter();
 
-  const handleSearchSubmit = () => {
-    if (selectedIngredients.length > 0) {
-      router.push(`/results?ingredients=${encodeURIComponent(selectedIngredients.join(','))}`);
-    }
+  const navigate = (name: string) => {
+    router.push(`/ingredients/${encodeURIComponent(name.toLowerCase())}`);
   };
-
-  const handleAddIngredient = (ingredient: string) => {
-    if (!selectedIngredients.includes(ingredient)) {
-      setSelectedIngredients([...selectedIngredients, ingredient]);
-    }
-  };
-
-  const handleRemoveIngredient = (ingredient: string) => {
-    setSelectedIngredients(selectedIngredients.filter(item => item !== ingredient));
-  };
-
-  const showFruits = activeFilter === 'All' || activeFilter === 'Fruits';
-  const showVeggies = activeFilter === 'All' || activeFilter === 'Veggies';
-  const showBoosts = activeFilter === 'All' || activeFilter === 'Boosts';
 
   return (
     <main className="flex flex-col items-center p-6 max-w-md mx-auto min-h-screen">
 
-      <div className="w-full mb-6 mt-4">
-        <h1 className="text-3xl font-black text-gray-900 leading-tight mb-2">Ingredients</h1>
-        <p className="text-gray-500 text-sm">Select what you have and we'll find the perfect juice.</p>
+      <div className="w-full mt-8 mb-6">
+        <h1 className="text-3xl font-black text-gray-900 leading-tight mb-2">Juicy Ingredients</h1>
+        <p className="text-gray-500 text-sm">Recipes always start with fresh ingredients. Get inspired and choose one to see all recipes that use it.</p>
       </div>
-
-      {/* Filter chips */}
-      <div className="w-full flex flex-wrap gap-2 mb-6">
-        {FILTERS.map(f => (
-          <button
-            key={f}
-            onClick={() => setActiveFilter(f)}
-            className={`text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full border transition-colors ${activeFilter === f ? 'bg-green-500 text-white border-green-500' : 'bg-white text-gray-500 border-gray-200 hover:border-green-300'}`}
-          >
-            {f}
-          </button>
-        ))}
-      </div>
-
-      {/* Selected ingredients */}
-      {selectedIngredients.length > 0 && (
-        <div className="w-full mb-6 p-4 bg-green-50 border border-green-100 rounded-2xl">
-          <p className="text-[10px] font-bold text-green-600 uppercase tracking-widest mb-2">Selected</p>
-          <div className="flex flex-wrap gap-2">
-            {selectedIngredients.map((item) => (
-              <button
-                key={item}
-                onClick={() => handleRemoveIngredient(item)}
-                className="px-3 py-1.5 bg-green-500 text-white rounded-full text-xs font-bold shadow-sm hover:bg-red-500 transition-colors flex items-center gap-2"
-              >
-                {item} ✕
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       <div className="w-full mb-8 z-10">
-        <SearchBar onAdd={handleAddIngredient} />
+        <SearchBar onAdd={navigate} />
       </div>
 
       {/* Fruits */}
-      {showFruits && (
-        <div className="w-full mb-8">
-          <h3 className="text-[10px] font-black text-gray-400 mb-3 uppercase tracking-widest">Fruits</h3>
-          <div className="flex flex-wrap gap-2">
-            {FRUITS.map((item) => (
-              <button
-                key={item.name}
-                onClick={() => handleAddIngredient(item.name)}
-                className={`px-4 py-2 rounded-full text-sm font-medium shadow-sm transition-all active:scale-95 border ${
-                  selectedIngredients.includes(item.name)
-                    ? 'bg-green-500 text-white border-green-500'
-                    : 'bg-white border-gray-100 hover:border-green-500 hover:text-green-600'
-                }`}
-              >
-                {item.icon} {item.name}
-              </button>
-            ))}
-          </div>
+      <div className="w-full mb-8">
+        <h3 className="text-[10px] font-black text-gray-400 mb-3 uppercase tracking-widest">Fruits</h3>
+        <div className="flex flex-wrap gap-2">
+          {FRUITS.map((item) => (
+            <button
+              key={item.name}
+              onClick={() => navigate(item.name)}
+              className="px-4 py-2 bg-white border border-gray-100 rounded-full text-sm font-medium shadow-sm hover:border-green-500 hover:text-green-600 transition-all active:scale-95"
+            >
+              {item.icon} {item.name}
+            </button>
+          ))}
         </div>
-      )}
+      </div>
 
       {/* Veggies */}
-      {showVeggies && (
-        <div className="w-full mb-8">
-          <h3 className="text-[10px] font-black text-gray-400 mb-3 uppercase tracking-widest">Veggies</h3>
-          <div className="flex flex-wrap gap-2">
-            {VEGGIES.map((item) => (
-              <button
-                key={item.name}
-                onClick={() => handleAddIngredient(item.name)}
-                className={`px-4 py-2 rounded-full text-sm font-medium shadow-sm transition-all active:scale-95 border ${
-                  selectedIngredients.includes(item.name)
-                    ? 'bg-green-500 text-white border-green-500'
-                    : 'bg-white border-gray-100 hover:border-green-500 hover:text-green-600'
-                }`}
-              >
-                {item.icon} {item.name}
-              </button>
-            ))}
-          </div>
+      <div className="w-full mb-8">
+        <h3 className="text-[10px] font-black text-gray-400 mb-3 uppercase tracking-widest">Veggies</h3>
+        <div className="flex flex-wrap gap-2">
+          {VEGGIES.map((item) => (
+            <button
+              key={item.name}
+              onClick={() => navigate(item.name)}
+              className="px-4 py-2 bg-white border border-gray-100 rounded-full text-sm font-medium shadow-sm hover:border-green-500 hover:text-green-600 transition-all active:scale-95"
+            >
+              {item.icon} {item.name}
+            </button>
+          ))}
         </div>
-      )}
+      </div>
 
       {/* Boosts */}
-      {showBoosts && (
-        <div className="w-full mb-12">
-          <h3 className="text-[10px] font-black text-purple-500 mb-3 uppercase tracking-widest">Boosts</h3>
-          <div className="flex flex-wrap gap-2">
-            {BOOSTS.map((item) => (
-              <button
-                key={item.name}
-                onClick={() => handleAddIngredient(item.name)}
-                className={`px-4 py-2 rounded-full text-sm font-medium shadow-sm transition-all active:scale-95 border ${
-                  selectedIngredients.includes(item.name)
-                    ? 'bg-purple-500 text-white border-purple-500'
-                    : 'bg-white border-purple-100 hover:border-purple-500 hover:text-purple-600'
-                }`}
-              >
-                {item.icon} {item.name}
-              </button>
-            ))}
-          </div>
+      <div className="w-full mb-12">
+        <h3 className="text-[10px] font-black text-purple-500 mb-3 uppercase tracking-widest">Boosts</h3>
+        <div className="flex flex-wrap gap-2">
+          {BOOSTS.map((item) => (
+            <button
+              key={item.name}
+              onClick={() => navigate(item.name)}
+              className="px-4 py-2 bg-white border border-purple-100 rounded-full text-sm font-medium shadow-sm hover:border-purple-500 hover:text-purple-600 transition-all active:scale-95"
+            >
+              {item.icon} {item.name}
+            </button>
+          ))}
         </div>
-      )}
-
-      {/* CTA */}
-      <div className="w-full mt-auto sticky bottom-6 pt-4">
-        <button
-          onClick={handleSearchSubmit}
-          disabled={selectedIngredients.length === 0}
-          className={`w-full font-black text-lg py-4 rounded-2xl shadow-lg transition-all active:scale-95 ${
-            selectedIngredients.length > 0
-              ? 'bg-green-600 text-white cursor-pointer'
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          }`}
-        >
-          {selectedIngredients.length > 0 ? "Let's Juice!" : "Add ingredients first"}
-        </button>
       </div>
 
     </main>

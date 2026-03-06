@@ -38,9 +38,8 @@ export default function SearchBar({ onAdd }: SearchBarProps) {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // If they hit Enter, add whatever they typed!
-    if (e.key === 'Enter' && query.trim() !== '') {
-      onAdd(query.trim());
+    if (e.key === 'Enter' && suggestions.length > 0) {
+      onAdd(suggestions[0]);
       setQuery('');
       setSuggestions([]);
     }
@@ -64,12 +63,12 @@ export default function SearchBar({ onAdd }: SearchBarProps) {
               key={index} 
               className="px-4 py-3 hover:bg-green-50 cursor-pointer text-gray-700 font-medium border-b border-gray-50 last:border-b-0 transition-colors"
               onClick={() => {
-                onAdd(item); // Send the item up to the main page!
+                onAdd(item);
                 setQuery('');
                 setSuggestions([]);
               }}
             >
-              + {item}
+              {item}
             </li>
           ))}
         </ul>
