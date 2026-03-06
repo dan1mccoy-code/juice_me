@@ -251,7 +251,7 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
 
       {/* Ad Unit */}
       <div className="w-full mb-8">
-        <AdUnit />
+        <AdUnit slot="3779095611" format="auto" responsive />
       </div>
 
       <Link href="/ingredients" className="text-gray-500 font-bold text-xs uppercase tracking-widest hover:text-green-500 transition-colors mb-8">

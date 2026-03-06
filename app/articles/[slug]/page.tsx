@@ -144,7 +144,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
         {/* Ad Unit */}
         <div className="w-full mt-10 mb-8">
-          <AdUnit />
+          <AdUnit slot="7195926014" format="fluid" layout="in-article" />
         </div>
 
         {/* Footer nav */}
