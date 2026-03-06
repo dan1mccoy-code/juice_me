@@ -150,13 +150,20 @@ function ResultsContent() {
         </div>
       )}
 
-      {/* --- BEAUTIFUL EMPTY STATE --- */}
+      {/* --- EMPTY STATE --- */}
       {!loading && filteredRecipes.length === 0 && (
         <div className="flex flex-col items-center py-12 px-4 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 text-5xl">
-            🧊
+
+          {/* Empty fridge graphic — same style as home page carrot */}
+          <div className="relative mb-8">
+            <div className="w-32 h-32 bg-blue-50 rounded-full flex items-center justify-center">
+              <span className="text-6xl">🧊</span>
+            </div>
+            <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-green-100 rounded-full flex items-center justify-center shadow-sm">
+              <span className="text-xl">?</span>
+            </div>
           </div>
-          
+
           <h2 className="text-2xl font-black text-gray-900 mb-2">Fridge is looking a bit light!</h2>
           <p className="text-gray-500 font-medium mb-10 leading-relaxed max-w-[280px]">
             We couldn't find a perfect match, but you are <b>so close</b> to these favorites:

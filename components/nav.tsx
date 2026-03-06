@@ -16,14 +16,28 @@ export default function Nav() {
           </span>
         </Link>
 
-        {!isHomePage && (
-          <Link 
-            href="/ingredients" 
+        <div className="flex items-center gap-4">
+          <Link
+            href="/articles"
             className="text-xs font-bold text-gray-400 hover:text-green-500 uppercase tracking-widest transition-colors"
           >
-            Start Over
+            Articles
           </Link>
-        )}
+          <Link
+            href="/about"
+            className="text-xs font-bold text-gray-400 hover:text-green-500 uppercase tracking-widest transition-colors"
+          >
+            About
+          </Link>
+          {!isHomePage && (
+            <Link
+              href="/ingredients"
+              className="text-xs font-bold text-gray-400 hover:text-green-500 uppercase tracking-widest transition-colors"
+            >
+              Start Over
+            </Link>
+          )}
+        </div>
       </div>
     </nav>
   );

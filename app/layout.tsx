@@ -1,36 +1,32 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import Nav from '@/components/nav';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'JuiceMe | Smart Juice Recipes from Your Fridge',
-  description: 'Find the perfect juice recipe based on the ingredients you have or your health goals.',
-  keywords: ['juice recipes', 'juicing ingredients', 'healthy drinks', 'fridge search', 'smoothie ideas'],
-  
-  // Explicitly map the icons to the /public folder
-  icons: {
-    icon: [
-      { url: '/favicon.ico' }, // Points to public/favicon.ico
-      { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
-    ],
-    apple: [
-      { url: '/apple-touch-icon.png' }, // Points to public/apple-touch-icon.png
-    ],
+  metadataBase: new URL('https://juiceme.app'),
+  title: {
+    default: 'JuiceMe | Smart Juice Recipes from Your Fridge',
+    template: '%s | JuiceMe',
   },
-  manifest: '/site.webmanifest',
-
+  description: 'Find the perfect juice recipe based on the ingredients you have or your health goals. 100+ healthy juice recipes sorted by ingredient.',
+  keywords: ['juice recipes', 'juicing', 'healthy drinks', 'juice ingredients', 'health boost', 'green juice', 'fruit juice', 'wellness drinks'],
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
     title: 'JuiceMe - What\'s in your fridge?',
-    description: 'Turn your leftover produce into powerful health boosts.',
+    description: 'Turn your leftover produce into powerful health boosts. Find juice recipes by ingredient.',
     url: 'https://juiceme.app',
     siteName: 'JuiceMe',
     locale: 'en_US',
     type: 'website',
+    images: [{ url: '/og-juice.jpg', width: 1200, height: 630, alt: 'JuiceMe - Smart Juice Recipes' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'JuiceMe',
-    description: 'Smart juice recipes based on your ingredients.',
+    title: 'JuiceMe - Smart Juice Recipes',
+    description: 'Find juice recipes based on what\'s in your fridge.',
+    images: ['/og-juice.jpg'],
   },
 };
 
@@ -42,7 +38,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Viewport is now moved out of metadata in newer Next.js versions */}
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
       </head>
       <body className="bg-gray-50 text-gray-900 min-h-screen">

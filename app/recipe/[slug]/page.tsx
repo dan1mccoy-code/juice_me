@@ -1,23 +1,9 @@
-"use client";
-
-import { useEffect, useState, use } from 'react';
+import { cache } from 'react';
+import type { Metadata } from 'next';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import StarRating from '@/components/StarRating';
-
-interface RecipeDetail {
-  id: string;
-  title: string;
-  description: string;
-  instructions: string[];
-  source_type: string;
-  rating_count: number;
-  rating_sum: number;
-  ingredients: {
-    name: string;
-    quantity_display: string;
-  }[];
-}
+import { notFound } from 'next/navigation';
 
 const GET_RECIPE_TAGS = (ingredients: string[]) => {
   const boostMap = [
@@ -30,93 +16,122 @@ const GET_RECIPE_TAGS = (ingredients: string[]) => {
   return boostMap.filter(boost => ingredients.some(ing => ing.toLowerCase().includes(boost.trigger.toLowerCase())));
 };
 
-export default function RecipePage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params);
-  const [recipe, setRecipe] = useState<RecipeDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+const getRecipe = cache(async (slug: string) => {
+  const { data, error } = await supabase
+    .from('recipes')
+    .select(`
+      id,
+      title,
+      description,
+      category,
+      instructions,
+      source_type,
+      rating_count,
+      rating_sum,
+      recipe_ingredients (
+        quantity_display,
+        ingredients (
+          name
+        )
+      )
+    `)
+    .eq('slug', slug)
+    .single();
 
-  useEffect(() => {
-    // 1. Reset state whenever the slug changes to prevent "ghost" data
-    setRecipe(null);
-    setLoading(true);
+  if (error || !data) return null;
 
-    async function fetchRecipe() {
-      if (!slug) return;
+  return {
+    id: data.id as string,
+    title: data.title as string,
+    description: (data.description as string) || '',
+    category: (data.category as string) || '',
+    instructions: Array.isArray(data.instructions) ? data.instructions as string[] : [],
+    source_type: data.source_type as string,
+    rating_count: Number(data.rating_count) || 0,
+    rating_sum: Number(data.rating_sum) || 0,
+    ingredients: (data.recipe_ingredients as any[])?.map((ri) => {
+      const ing = Array.isArray(ri.ingredients) ? ri.ingredients[0] : ri.ingredients;
+      return {
+        name: ing?.name || 'Unknown Ingredient',
+        quantity_display: ri.quantity_display || '',
+      };
+    }) || [],
+  };
+});
 
-      try {
-        const { data, error } = await supabase
-          .from('recipes')
-          .select(`
-            id,
-            title,
-            description,
-            instructions,
-            source_type,
-            rating_count,
-            rating_sum,
-            recipe_ingredients (
-              quantity_display,
-              ingredients (
-                name
-              )
-            )
-          `)
-          .eq('slug', slug)
-          .single();
+const getSimilarRecipes = cache(async (category: string, currentSlug: string) => {
+  const { data } = await supabase
+    .from('recipes')
+    .select('title, slug, source_type, rating_count, rating_sum')
+    .eq('category', category)
+    .neq('slug', currentSlug)
+    .order('rating_count', { ascending: false })
+    .limit(6);
+  return data || [];
+});
 
-        if (error) throw error;
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const recipe = await getRecipe(slug);
+  if (!recipe) return {};
 
-        const formatted: RecipeDetail = {
-          id: data.id,
-          title: data.title,
-          description: data.description || '',
-          instructions: Array.isArray(data.instructions) ? data.instructions : [],
-          source_type: data.source_type,
-          rating_count: Number(data.rating_count) || 0,
-          rating_sum: Number(data.rating_sum) || 0,
-          ingredients: data.recipe_ingredients?.map((ri: any) => {
-            const ingredientData = Array.isArray(ri.ingredients) ? ri.ingredients[0] : ri.ingredients;
-            return {
-              name: ingredientData?.name || 'Unknown Ingredient',
-              quantity_display: ri.quantity_display || ''
-            };
-          }) || []
-        };
+  const description = recipe.description ||
+    `How to make ${recipe.title} — a healthy juice recipe with ${recipe.ingredients.slice(0, 3).map(i => i.name).join(', ')}.`;
 
-        setRecipe(formatted);
-      } catch (err) {
-        console.error("Error fetching recipe:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
+  return {
+    title: recipe.title,
+    description,
+    alternates: { canonical: `/recipe/${slug}` },
+    openGraph: {
+      title: recipe.title,
+      description,
+      url: `/recipe/${slug}`,
+      type: 'article',
+    },
+    twitter: {
+      title: recipe.title,
+      description,
+    },
+  };
+}
 
-    fetchRecipe();
-  }, [slug]); // Correctly triggers on every navigation change
+export default async function RecipePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const recipe = await getRecipe(slug);
+  if (!recipe) notFound();
 
-  if (loading) return <div className="p-8 text-center text-green-500 animate-pulse font-bold tracking-widest uppercase text-xs">Squeezing your recipe...</div>;
-  if (!recipe) return <div className="p-8 text-center font-bold text-gray-400">Recipe not found.</div>;
+  const [tags, similarRecipes] = await Promise.all([
+    Promise.resolve(GET_RECIPE_TAGS(recipe.ingredients.map(i => i.name))),
+    getSimilarRecipes(recipe.category, slug),
+  ]);
 
-  const tags = GET_RECIPE_TAGS(recipe.ingredients.map(i => i.name));
   const avgRating = recipe.rating_count > 0 ? (recipe.rating_sum / recipe.rating_count) : 0;
 
   const jsonLd = {
-    "@context": "https://schema.org/",
-    "@type": "Recipe",
-    "name": recipe.title,
-    "image": ["https://juiceme.app/og-juice.jpg"],
-    "author": { "@type": "Organization", "name": "JuiceMe Community" },
-    "recipeIngredient": recipe.ingredients.map(i => `${i.quantity_display} ${i.name}`),
-    "recipeInstructions": recipe.instructions.map((step, i) => ({
-      "@type": "HowToStep",
-      "text": step,
-      "position": i + 1
+    '@context': 'https://schema.org/',
+    '@type': 'Recipe',
+    'name': recipe.title,
+    'description': recipe.description || undefined,
+    'image': ['https://juiceme.app/og-juice.jpg'],
+    'author': { '@type': 'Organization', 'name': 'JuiceMe Community' },
+    'recipeCategory': recipe.category,
+    'recipeCuisine': 'Healthy',
+    'keywords': recipe.ingredients.map(i => i.name).join(', '),
+    'recipeIngredient': recipe.ingredients.map(i => `${i.quantity_display} ${i.name}`.trim()),
+    'recipeInstructions': recipe.instructions.map((step, i) => ({
+      '@type': 'HowToStep',
+      'position': i + 1,
+      'text': step,
     })),
-    "aggregateRating": recipe.rating_count > 0 ? {
-      "@type": "AggregateRating",
-      "ratingValue": avgRating.toFixed(1),
-      "ratingCount": recipe.rating_count
-    } : undefined
+    ...(recipe.rating_count > 0 && {
+      'aggregateRating': {
+        '@type': 'AggregateRating',
+        'ratingValue': avgRating.toFixed(1),
+        'ratingCount': recipe.rating_count,
+        'bestRating': '5',
+        'worstRating': '1',
+      },
+    }),
   };
 
   return (
@@ -125,21 +140,22 @@ export default function RecipePage({ params }: { params: Promise<{ slug: string 
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      
+
+      {/* Header */}
       <div className="w-full mb-8 mt-4 text-left">
         <h1 className="text-3xl font-black text-gray-900 leading-tight mb-3">
           {recipe.title}
         </h1>
-        
+
         {recipe.description && (
           <p className="text-gray-600 text-sm leading-relaxed mb-4">{recipe.description}</p>
         )}
 
         <div className="flex flex-wrap items-center gap-2 mb-6">
           <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full border flex items-center gap-1 ${
-            recipe.source_type === 'human' 
-            ? 'bg-blue-50 text-blue-600 border-blue-100' 
-            : 'bg-purple-50 text-purple-600 border-purple-100'
+            recipe.source_type === 'human'
+              ? 'bg-blue-50 text-blue-600 border-blue-100'
+              : 'bg-purple-50 text-purple-600 border-purple-100'
           }`}>
             {recipe.source_type === 'human' ? '🧑‍🍳 Human' : '🤖 AI'}
           </span>
@@ -151,13 +167,14 @@ export default function RecipePage({ params }: { params: Promise<{ slug: string 
           ))}
         </div>
 
-        <StarRating 
-          recipeId={recipe.id} 
-          initialRating={avgRating} 
-          totalRatings={recipe.rating_count} 
+        <StarRating
+          recipeId={recipe.id}
+          initialRating={avgRating}
+          totalRatings={recipe.rating_count}
         />
       </div>
 
+      {/* Ingredients */}
       <div className="w-full bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
         <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4 italic">Ingredients</h2>
         <ul className="space-y-4">
@@ -174,7 +191,50 @@ export default function RecipePage({ params }: { params: Promise<{ slug: string 
         </ul>
       </div>
 
-      <div className="w-full bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-12">
+      {/* Other Blends */}
+      {similarRecipes.length > 0 && (
+        <div className="w-full mb-6">
+          <h2 className="text-xl font-bold mb-4">Other Blends</h2>
+          <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar snap-x">
+            {similarRecipes.map((r: any) => {
+              const avg = r.rating_count > 0
+                ? (r.rating_sum / r.rating_count).toFixed(1)
+                : '0.0';
+              return (
+                <Link
+                  key={r.slug}
+                  href={`/recipe/${r.slug}`}
+                  className="relative min-w-[200px] bg-white rounded-[2rem] shadow-sm border border-gray-100 p-5 flex flex-col justify-between snap-start active:scale-95 transition-all hover:border-green-200"
+                >
+                  {r.rating_count > 5 && (
+                    <span className="absolute -top-2 -right-1 bg-orange-500 text-white text-[8px] font-black px-2 py-1 rounded-full shadow-md tracking-widest uppercase">
+                      HOT
+                    </span>
+                  )}
+                  <div>
+                    <p className="font-bold text-base leading-tight mb-2 line-clamp-2">{r.title}</p>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs">⭐</span>
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        {avg} ({r.rating_count})
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center mt-3">
+                    <span className={`text-[10px] font-bold uppercase tracking-widest ${r.source_type === 'human' ? 'text-blue-500' : 'text-purple-500'}`}>
+                      {r.source_type === 'human' ? '🧑‍🍳 Human' : '🤖 AI'}
+                    </span>
+                    <span className="text-gray-200 font-bold">→</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Instructions */}
+      <div className="w-full bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
         <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4 italic">Instructions</h2>
         <div className="space-y-6">
           {recipe.instructions.map((step, i) => (
@@ -187,9 +247,14 @@ export default function RecipePage({ params }: { params: Promise<{ slug: string 
           ))}
         </div>
       </div>
-      
-      <Link href="/" className="text-gray-500 font-bold text-xs uppercase tracking-widest hover:text-green-500 transition-colors mb-8">
-        ← Back to Fridge
+
+      {/* Ad Placeholder */}
+      <div className="w-full h-[100px] bg-gray-100 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center mb-8">
+        <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">Advertisement</p>
+      </div>
+
+      <Link href="/ingredients" className="text-gray-500 font-bold text-xs uppercase tracking-widest hover:text-green-500 transition-colors mb-8">
+        Choose other ingredients
       </Link>
     </main>
   );
