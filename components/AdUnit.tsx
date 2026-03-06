@@ -1,12 +1,11 @@
 'use client';
 import { useEffect, useRef } from 'react';
 
-// Replace SLOT_ID below with your data-ad-slot value from AdSense > Ads > By ad unit
-const AD_SLOT_ID = 'REPLACE_WITH_YOUR_AD_SLOT_ID';
+
 const AD_CLIENT = 'ca-pub-1653085663752838';
+const AD_SLOT = '7195926014';
 
 export default function AdUnit() {
-  const adRef = useRef<HTMLModElement>(null);
   const pushed = useRef(false);
 
   useEffect(() => {
@@ -23,13 +22,12 @@ export default function AdUnit() {
   return (
     <div className="w-full overflow-hidden">
       <ins
-        ref={adRef}
         className="adsbygoogle"
-        style={{ display: 'block' }}
+        style={{ display: 'block', textAlign: 'center' }}
+        data-ad-layout="in-article"
+        data-ad-format="fluid"
         data-ad-client={AD_CLIENT}
-        data-ad-slot={AD_SLOT_ID}
-        data-ad-format="auto"
-        data-full-width-responsive="true"
+        data-ad-slot={AD_SLOT}
       />
     </div>
   );
