@@ -57,10 +57,10 @@ export const articles: Article[] = [
     title: "Beginner's Guide to Juicing: What You Need and How to Start",
     description: "New to juicing? Here's exactly what to buy, what to juice first, and how to get a good result every time. No fluff — just what works.",
     publishedAt: '2026-03-06',
-    heroImage: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80&fit=crop',
-    heroAlt: 'Fresh produce and healthy ingredients laid out for juicing',
+    heroImage: 'https://images.unsplash.com/photo-1703108158603-02a5a9db8302?w=800&q=80&fit=crop',
+    heroAlt: 'Close-up of a blender filled with fresh orange juice',
     hook: 'Starting to juice is simple. Getting a good result the first time is what most beginners miss. Here\'s the equipment, the ingredients, and the method — so you\'re not guessing on day one.',
-    tags: ['Health & Nutrition'],
+    tags: ['Health & Nutrition', 'Kitchen Tools'],
     relatedRecipeSlugs: ['apple-carrot-ginger', 'cucumber-apple-mint', 'carrot-beet-apple'],
     relatedArticleSlugs: ['best-juicing-combinations-for-beginners', 'what-to-grab-from-the-produce-aisle'],
     sections: [
