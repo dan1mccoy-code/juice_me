@@ -117,23 +117,29 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
     '@context': 'https://schema.org/',
     '@type': 'Recipe',
     'name': recipe.title,
-    'description': recipe.description || undefined,
-    'image': ['https://juiceme.app/og-juice.jpg'],
-    'author': { '@type': 'Organization', 'name': 'JuiceMe Community' },
+    'description': recipe.description || `How to make ${recipe.title} — a healthy juice recipe with ${recipe.ingredients.slice(0, 3).map(i => i.name).join(', ')}.`,
+    'image': ['https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=1200&q=80&fit=crop'],
+    'author': { '@type': 'Organization', 'name': 'JuiceMe', 'url': 'https://juiceme.app' },
+    'publisher': { '@type': 'Organization', 'name': 'JuiceMe', 'url': 'https://juiceme.app' },
+    'datePublished': '2026-01-01',
     'recipeCategory': recipe.category,
     'recipeCuisine': 'Healthy',
+    'totalTime': 'PT10M',
+    'recipeYield': '1 serving',
     'keywords': recipe.ingredients.map(i => i.name).join(', '),
     'recipeIngredient': recipe.ingredients.map(i => `${i.quantity_display} ${i.name}`.trim()),
     'recipeInstructions': recipe.instructions.map((step, i) => ({
       '@type': 'HowToStep',
       'position': i + 1,
+      'name': `Step ${i + 1}`,
       'text': step,
+      'url': `https://juiceme.app/recipe/${slug}#step-${i + 1}`,
     })),
     ...(recipe.rating_count > 0 && {
       'aggregateRating': {
         '@type': 'AggregateRating',
         'ratingValue': avgRating.toFixed(1),
-        'ratingCount': recipe.rating_count,
+        'reviewCount': recipe.rating_count,
         'bestRating': '5',
         'worstRating': '1',
       },
@@ -244,7 +250,7 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
         <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4 italic">Instructions</h2>
         <div className="space-y-6">
           {recipe.instructions.map((step, i) => (
-            <div key={i} className="flex gap-4">
+            <div key={i} id={`step-${i + 1}`} className="flex gap-4">
               <span className="flex-shrink-0 w-7 h-7 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm">
                 {i + 1}
               </span>
