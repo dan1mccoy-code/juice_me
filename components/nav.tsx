@@ -1,11 +1,8 @@
 "use client";
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
 export default function Nav() {
-  const pathname = usePathname();
-  const isHomePage = pathname === '/';
   const [open, setOpen] = useState(false);
 
   return (
@@ -20,17 +17,18 @@ export default function Nav() {
 
         {/* Desktop links */}
         <div className="hidden sm:flex items-center gap-4">
+          <Link href="/recipes" className="text-xs font-bold text-gray-400 hover:text-green-500 uppercase tracking-widest transition-colors">
+            Recipes
+          </Link>
+          <Link href="/ingredients" className="text-xs font-bold text-gray-400 hover:text-green-500 uppercase tracking-widest transition-colors">
+            Ingredients
+          </Link>
           <Link href="/articles" className="text-xs font-bold text-gray-400 hover:text-green-500 uppercase tracking-widest transition-colors">
             Articles
           </Link>
           <Link href="/about" className="text-xs font-bold text-gray-400 hover:text-green-500 uppercase tracking-widest transition-colors">
             About
           </Link>
-          {!isHomePage && (
-            <Link href="/ingredients" className="text-xs font-bold text-gray-400 hover:text-green-500 uppercase tracking-widest transition-colors">
-              Start Over
-            </Link>
-          )}
         </div>
 
         {/* Mobile hamburger */}
@@ -48,17 +46,18 @@ export default function Nav() {
       {/* Mobile dropdown */}
       {open && (
         <div className="sm:hidden border-t border-gray-100 bg-white/95 backdrop-blur-md px-6 py-4 flex flex-col gap-4">
+          <Link href="/recipes" className="text-xs font-bold text-gray-500 hover:text-green-500 uppercase tracking-widest transition-colors" onClick={() => setOpen(false)}>
+            Recipes
+          </Link>
+          <Link href="/ingredients" className="text-xs font-bold text-gray-500 hover:text-green-500 uppercase tracking-widest transition-colors" onClick={() => setOpen(false)}>
+            Ingredients
+          </Link>
           <Link href="/articles" className="text-xs font-bold text-gray-500 hover:text-green-500 uppercase tracking-widest transition-colors" onClick={() => setOpen(false)}>
             Articles
           </Link>
           <Link href="/about" className="text-xs font-bold text-gray-500 hover:text-green-500 uppercase tracking-widest transition-colors" onClick={() => setOpen(false)}>
             About
           </Link>
-          {!isHomePage && (
-            <Link href="/ingredients" className="text-xs font-bold text-gray-500 hover:text-green-500 uppercase tracking-widest transition-colors" onClick={() => setOpen(false)}>
-              Start Over
-            </Link>
-          )}
         </div>
       )}
     </nav>
