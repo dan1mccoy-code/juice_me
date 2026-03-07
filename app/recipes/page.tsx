@@ -43,7 +43,7 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
   const list = recipes ?? [];
 
   return (
-    <main className="flex flex-col items-center p-6 max-w-md mx-auto min-h-screen">
+    <main className="flex flex-col items-center p-6 max-w-5xl mx-auto min-h-screen">
       <div className="w-full mt-8 mb-6">
         <h1 className="text-3xl font-black text-gray-900 leading-tight mb-2">Recipes</h1>
         <p className="text-gray-500 text-sm">{list.length} juice recipe{list.length !== 1 ? 's' : ''}{activeCategory ? ` in ${activeCategory}` : ' across all categories'}.</p>
@@ -69,7 +69,7 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
       </div>
 
       {/* Recipe list */}
-      <div className="w-full space-y-3 mb-12">
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-12">
         {list.length > 0 ? list.map((r: any) => {
           const avg = r.rating_count > 0 ? (r.rating_sum / r.rating_count).toFixed(1) : '0.0';
           const catColor = CATEGORY_COLORS[r.category] ?? 'bg-gray-50 text-gray-500 border-gray-100';

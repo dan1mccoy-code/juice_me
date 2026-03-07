@@ -40,7 +40,7 @@ export default function IngredientsPage() {
   };
 
   return (
-    <main className="flex flex-col items-center p-6 max-w-md mx-auto min-h-screen">
+    <main className="flex flex-col items-center p-6 max-w-lg mx-auto min-h-screen">
 
       <div className="w-full mt-8 mb-6">
         <h1 className="text-3xl font-black text-gray-900 leading-tight mb-2">Juicy Ingredients</h1>

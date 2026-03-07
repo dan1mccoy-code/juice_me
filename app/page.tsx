@@ -37,7 +37,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex flex-col items-center p-6 max-w-md mx-auto min-h-screen">
+    <main className="flex flex-col items-center p-6 max-w-md md:max-w-2xl mx-auto min-h-screen">
       
       {/* Hero Section */}
       <div className="w-full flex flex-col items-center justify-center mt-12 mb-10">
@@ -48,17 +48,17 @@ export default function Home() {
       </div>
 
       {/* The Two Paths */}
-      <div className="w-full space-y-4">
-        <Link 
+      <div className="w-full flex flex-col sm:flex-row gap-4">
+        <Link
           href="/find"
-          className="block w-full bg-green-500 hover:bg-green-600 text-white text-center font-medium text-lg py-4 rounded-2xl shadow-sm transition-colors"
+          className="block sm:flex-1 w-full bg-green-500 hover:bg-green-600 text-white text-center font-medium text-lg py-4 rounded-2xl shadow-sm transition-colors"
         >
           I have ingredients
         </Link>
-        
-        <Link 
-          href="/boost" 
-          className="block w-full bg-white border-2 border-purple-500 text-purple-600 hover:bg-purple-50 text-center font-semibold text-lg py-4 rounded-2xl shadow-sm transition-all active:scale-95"
+
+        <Link
+          href="/boost"
+          className="block sm:flex-1 w-full bg-white border-2 border-purple-500 text-purple-600 hover:bg-purple-50 text-center font-semibold text-lg py-4 rounded-2xl shadow-sm transition-all active:scale-95"
         >
           I need a boost
         </Link>
@@ -70,23 +70,22 @@ export default function Home() {
           🔥 Trending This Week
         </h2>
         
-        <div className="flex gap-4 overflow-x-auto pb-6 no-scrollbar snap-x">
+        <div className="flex gap-4 overflow-x-auto pb-6 no-scrollbar snap-x md:grid md:grid-cols-3 md:overflow-x-visible md:pb-0">
           {loading ? (
-            [1, 2].map((i) => (
-              <div key={i} className="min-w-[220px] h-36 bg-gray-50 rounded-3xl animate-pulse border border-gray-100" />
+            [1, 2, 3].map((i) => (
+              <div key={i} className="min-w-[220px] md:min-w-0 h-36 bg-gray-50 rounded-3xl animate-pulse border border-gray-100" />
             ))
           ) : trending.length > 0 ? (
             trending.map((recipe) => {
-              const avgRating = recipe.rating_count > 0 
-                ? (recipe.rating_sum / recipe.rating_count).toFixed(1) 
+              const avgRating = recipe.rating_count > 0
+                ? (recipe.rating_sum / recipe.rating_count).toFixed(1)
                 : "0.0";
-              
+
               return (
-                /* FIX: Using template literal with recipe.slug for the href */
-                <Link 
+                <Link
                   href={`/recipe/${recipe.slug}`}
-                  key={recipe.slug} 
-                  className="relative min-w-[220px] bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6 flex flex-col justify-between snap-start active:scale-95 transition-all hover:border-green-200"
+                  key={recipe.slug}
+                  className="relative min-w-[220px] md:min-w-0 bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6 flex flex-col justify-between snap-start active:scale-95 transition-all hover:border-green-200"
                 >
                   {recipe.rating_count > 5 && (
                     <span className="absolute -top-2 -right-1 bg-orange-500 text-white text-[8px] font-black px-2 py-1 rounded-full shadow-md tracking-widest uppercase">
@@ -105,18 +104,18 @@ export default function Home() {
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="flex justify-between items-center mt-4">
-                     <span className={`text-[10px] font-bold uppercase tracking-widest ${recipe.source_type === 'human' ? 'text-blue-500' : 'text-purple-500'}`}>
-                       {recipe.source_type === 'human' ? '🧑‍🍳 Human' : '🤖 AI'}
-                     </span>
-                     <span className="text-gray-200 font-bold">→</span>
+                    <span className={`text-[10px] font-bold uppercase tracking-widest ${recipe.source_type === 'human' ? 'text-blue-500' : 'text-purple-500'}`}>
+                      {recipe.source_type === 'human' ? '🧑‍🍳 Human' : '🤖 AI'}
+                    </span>
+                    <span className="text-gray-200 font-bold">→</span>
                   </div>
                 </Link>
               );
             })
           ) : (
-            <div className="w-full py-10 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+            <div className="col-span-3 w-full py-10 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
               <p className="text-gray-400 text-sm">No trending juices yet!</p>
             </div>
           )}

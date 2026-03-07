@@ -63,7 +63,7 @@ export default function FindPage() {
   const showBoosts = activeFilter === 'All' || activeFilter === 'Boosts';
 
   return (
-    <main className="flex flex-col items-center p-6 max-w-md mx-auto min-h-screen">
+    <main className="flex flex-col items-center p-6 max-w-lg mx-auto min-h-screen">
 
       <div className="w-full mb-6 mt-4">
         <h1 className="text-2xl font-black text-gray-900 leading-tight">What's in your fridge?</h1>

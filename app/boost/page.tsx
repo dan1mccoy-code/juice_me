@@ -50,7 +50,7 @@ export default function BoostPage() {
   };
 
   return (
-    <main className="flex flex-col items-center p-6 max-w-md mx-auto min-h-screen">
+    <main className="flex flex-col items-center p-6 max-w-lg mx-auto min-h-screen">
       
       {/* SECTION 1: THE GOAL */}
       <div className="w-full mb-8 mt-4">

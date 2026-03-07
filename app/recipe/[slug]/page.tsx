@@ -150,7 +150,7 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
   };
 
   return (
-    <main className="flex flex-col items-center p-6 max-w-md mx-auto min-h-screen">
+    <main className="flex flex-col items-center p-6 max-w-3xl mx-auto min-h-screen">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -212,7 +212,7 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
       {similarRecipes.length > 0 && (
         <div className="w-full mb-6">
           <h2 className="text-xl font-bold mb-4">Other Blends</h2>
-          <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar snap-x">
+          <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar snap-x md:grid md:grid-cols-3 md:overflow-x-visible md:pb-0">
             {similarRecipes.map((r: any) => {
               const avg = r.rating_count > 0
                 ? (r.rating_sum / r.rating_count).toFixed(1)
@@ -221,7 +221,7 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
                 <Link
                   key={r.slug}
                   href={`/recipe/${r.slug}`}
-                  className="relative min-w-[200px] bg-white rounded-[2rem] shadow-sm border border-gray-100 p-5 flex flex-col justify-between snap-start active:scale-95 transition-all hover:border-green-200"
+                  className="relative min-w-[200px] md:min-w-0 bg-white rounded-[2rem] shadow-sm border border-gray-100 p-5 flex flex-col justify-between snap-start active:scale-95 transition-all hover:border-green-200"
                 >
                   {r.rating_count > 5 && (
                     <span className="absolute -top-2 -right-1 bg-orange-500 text-white text-[8px] font-black px-2 py-1 rounded-full shadow-md tracking-widest uppercase">

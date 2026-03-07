@@ -7,7 +7,7 @@ export default function Nav() {
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-gray-100">
-      <div className="max-w-md mx-auto px-6 py-4 flex justify-between items-center">
+      <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
         <Link href="/" className="flex items-center gap-2 group" onClick={() => setOpen(false)}>
           <span className="text-2xl group-hover:scale-110 transition-transform">🧃</span>
           <span className="font-black text-xl tracking-tighter text-green-600">

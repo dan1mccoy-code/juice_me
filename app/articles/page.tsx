@@ -26,7 +26,7 @@ export default async function ArticlesPage({ searchParams }: { searchParams: Pro
     : articles;
 
   return (
-    <main className="flex flex-col items-center p-6 max-w-md mx-auto min-h-screen">
+    <main className="flex flex-col items-center p-6 max-w-5xl mx-auto min-h-screen">
       <div className="w-full mt-8 mb-6">
         <h1 className="text-3xl font-black text-gray-900 leading-tight mb-2">Articles</h1>
         <p className="text-gray-500 text-sm">Tips, guides, and ideas to help you juice better.</p>
@@ -51,7 +51,7 @@ export default async function ArticlesPage({ searchParams }: { searchParams: Pro
         ))}
       </div>
 
-      <div className="w-full space-y-6 mb-12">
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
         {filtered.length > 0 ? filtered.map((article) => (
           <Link
             key={article.slug}
@@ -64,7 +64,7 @@ export default async function ArticlesPage({ searchParams }: { searchParams: Pro
                 alt={article.heroAlt}
                 fill
                 className="object-cover"
-                sizes="(max-width: 768px) 100vw, 448px"
+                sizes="(max-width: 768px) 100vw, 50vw"
               />
             </div>
             <div className="p-5">

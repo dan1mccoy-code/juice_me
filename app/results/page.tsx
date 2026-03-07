@@ -200,7 +200,7 @@ function ResultsContent() {
         </div>
       )}
 
-      <div className="flex flex-col gap-4 pb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-12">
         {filteredRecipes.map((recipe) => (
           <Link 
             href={`/recipe/${recipe.slug}`} 
@@ -233,7 +233,7 @@ function ResultsContent() {
 
 export default function ResultsPage() {
   return (
-    <main className="flex flex-col items-center p-6 max-w-md mx-auto min-h-screen">
+    <main className="flex flex-col items-center p-6 max-w-2xl mx-auto min-h-screen">
       <Suspense fallback={<div className="mt-12 text-green-500 animate-pulse font-medium tracking-widest uppercase text-xs">Loading Results...</div>}>
         <ResultsContent />
       </Suspense>
