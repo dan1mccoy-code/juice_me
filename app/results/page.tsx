@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense, useMemo } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import RecipeCard, { type CardIngredient } from '@/components/RecipeCard';
 
 const GET_BOOST_LABEL = (goalName: string) => {
   const boosts: Record<string, { label: string; icon: string; textColor: string }> = {
@@ -25,13 +26,16 @@ interface RecipeResult {
   missing_count: number;
   missing_ingredients: string[];
   source_type: string;
+  rating_count?: number;
+  rating_sum?: number;
+  ingredients?: CardIngredient[];
 }
 
 function ResultsContent() {
   const searchParams = useSearchParams();
   const ingredientsParam = searchParams.get('ingredients');
   const goalParam = searchParams.get('goal');
-  
+
   const userIngredients = useMemo(() =>
     ingredientsParam ? ingredientsParam.split(',').map(i => i.trim()).filter(Boolean) : [],
     [ingredientsParam]
@@ -41,8 +45,8 @@ function ResultsContent() {
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<'all' | 'human' | 'ai'>('all');
 
-  const boostInfo = useMemo(() => 
-    goalParam ? GET_BOOST_LABEL(goalParam) : null, 
+  const boostInfo = useMemo(() =>
+    goalParam ? GET_BOOST_LABEL(goalParam) : null,
     [goalParam]
   );
 
@@ -60,18 +64,65 @@ function ResultsContent() {
           .in('name', userIngredients);
 
         if (ingError) throw ingError;
-        
+
         const ingredientIds = ingData?.map(i => i.id) || [];
 
-        if (ingredientIds.length > 0) {
-          const { data: recipeData, error: recipeError } = await supabase
-            .rpc('find_juices', { user_ingredient_ids: ingredientIds });
-
-          if (recipeError) throw recipeError;
-          setRecipes(recipeData || []);
-        } else {
+        if (ingredientIds.length === 0) {
           setRecipes([]);
+          return;
         }
+
+        const { data: recipeData, error: recipeError } = await supabase
+          .rpc('find_juices', { user_ingredient_ids: ingredientIds });
+
+        if (recipeError) throw recipeError;
+        const results: RecipeResult[] = recipeData || [];
+
+        // Batch-fetch ingredients and ratings for matched recipes
+        const recipeIds = results.map(r => r.recipe_id);
+        const [{ data: riRows }, { data: ratingsRows }] = await Promise.all([
+          supabase
+            .from('recipe_ingredients')
+            .select('recipe_id, ingredients(name)')
+            .in('recipe_id', recipeIds),
+          supabase
+            .from('recipes')
+            .select('id, rating_count, rating_sum')
+            .in('id', recipeIds),
+        ]);
+
+        // Build map: recipe_id -> { rating_count, rating_sum }
+        const ratingsMap: Record<string, { rating_count: number; rating_sum: number }> = {};
+        for (const row of (ratingsRows ?? [])) {
+          ratingsMap[(row as any).id] = {
+            rating_count: Number((row as any).rating_count) || 0,
+            rating_sum: Number((row as any).rating_sum) || 0,
+          };
+        }
+
+        // Build map: recipe_id -> ingredient names
+        const riMap: Record<string, string[]> = {};
+        for (const row of (riRows ?? [])) {
+          const ing = Array.isArray((row as any).ingredients)
+            ? (row as any).ingredients[0]
+            : (row as any).ingredients;
+          const name: string = ing?.name;
+          if (!name) continue;
+          if (!riMap[(row as any).recipe_id]) riMap[(row as any).recipe_id] = [];
+          riMap[(row as any).recipe_id].push(name);
+        }
+
+        const userIngLower = userIngredients.map(i => i.toLowerCase());
+
+        const withIngredients = results.map(r => ({
+          ...r,
+          ...ratingsMap[r.recipe_id],
+          ingredients: (riMap[r.recipe_id] ?? [])
+            .sort()
+            .map(name => ({ name, have: userIngLower.includes(name.toLowerCase()) })),
+        }));
+
+        setRecipes(withIngredients);
       } catch (error: any) {
         console.error("Database Error:", error);
       } finally {
@@ -82,14 +133,13 @@ function ResultsContent() {
     fetchMatches();
   }, [userIngredients]);
 
-  const filteredRecipes = recipes.filter(r => 
+  const filteredRecipes = recipes.filter(r =>
     activeFilter === 'all' ? true : r.source_type === activeFilter
   );
 
-  // LOGIC: Identify which ingredients are most commonly missing across all potential recipes
   const missingIngredientSuggestions = useMemo(() => {
     if (recipes.length === 0 || loading) return [];
-    
+
     const counts: Record<string, number> = {};
     recipes.forEach(r => {
       r.missing_ingredients.forEach(ing => {
@@ -98,8 +148,8 @@ function ResultsContent() {
     });
 
     return Object.entries(counts)
-      .sort((a, b) => b[1] - a[1]) // Sort by frequency
-      .slice(0, 3); // Top 3
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3);
   }, [recipes, loading]);
 
   return (
@@ -128,12 +178,12 @@ function ResultsContent() {
       {!loading && recipes.length > 0 && (
         <div className="flex gap-2 mb-8 overflow-x-auto pb-2 no-scrollbar">
           {(['all', 'human', 'ai'] as const).map((type) => (
-            <button 
+            <button
               key={type}
               onClick={() => setActiveFilter(type)}
               className={`px-5 py-2 rounded-full text-[10px] uppercase tracking-widest font-black transition-all whitespace-nowrap ${
-                activeFilter === type 
-                  ? 'bg-green-600 text-white shadow-md' 
+                activeFilter === type
+                  ? 'bg-green-600 text-white shadow-md'
                   : 'bg-white border border-gray-100 text-gray-400 hover:border-green-200'
               }`}
             >
@@ -150,11 +200,9 @@ function ResultsContent() {
         </div>
       )}
 
-      {/* --- EMPTY STATE --- */}
+      {/* Empty state */}
       {!loading && filteredRecipes.length === 0 && (
         <div className="flex flex-col items-center py-12 px-4 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-
-          {/* Empty fridge graphic — same style as home page carrot */}
           <div className="relative mb-8">
             <div className="w-32 h-32 bg-blue-50 rounded-full flex items-center justify-center">
               <span className="text-6xl">🧊</span>
@@ -174,7 +222,7 @@ function ResultsContent() {
               Try adding one of these:
             </h3>
             {missingIngredientSuggestions.map(([name, count]) => (
-              <div 
+              <div
                 key={name}
                 className="w-full bg-white border border-gray-100 rounded-3xl p-5 flex justify-between items-center shadow-sm"
               >
@@ -191,7 +239,7 @@ function ResultsContent() {
             ))}
           </div>
 
-          <Link 
+          <Link
             href="/"
             className="w-full py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-black transition-all shadow-lg active:scale-95"
           >
@@ -200,31 +248,17 @@ function ResultsContent() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-12">
         {filteredRecipes.map((recipe) => (
-          <Link 
-            href={`/recipe/${recipe.slug}`} 
-            key={recipe.recipe_id} 
-            className="block w-full bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:border-green-300 transition-all active:scale-[0.98]"
-          >
-            <div className="flex justify-between items-start mb-2">
-              <h3 className="text-xl font-bold text-gray-900 leading-tight">{recipe.title}</h3>
-              <span className="text-[10px] font-black uppercase text-gray-300 tracking-widest">
-                {recipe.source_type === 'human' ? '🧑‍🍳' : '🤖'}
-              </span>
-            </div>
-            <div className="mt-4">
-              {Number(recipe.missing_count) === 0 ? (
-                <span className="inline-block bg-green-100 text-green-700 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full">
-                  ✅ Ready to juice
-                </span>
-              ) : (
-                <span className="inline-block bg-yellow-50 text-yellow-700 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border border-yellow-100">
-                  Almost there! Add: {recipe.missing_ingredients.join(', ')}
-                </span>
-              )}
-            </div>
-          </Link>
+          <RecipeCard
+            key={recipe.recipe_id}
+            title={recipe.title}
+            slug={recipe.slug}
+            source_type={recipe.source_type}
+            rating_count={recipe.rating_count ?? 0}
+            rating_sum={recipe.rating_sum ?? 0}
+            ingredients={recipe.ingredients}
+          />
         ))}
       </div>
     </div>
@@ -233,7 +267,7 @@ function ResultsContent() {
 
 export default function ResultsPage() {
   return (
-    <main className="flex flex-col items-center p-6 max-w-2xl mx-auto min-h-screen">
+    <main className="flex flex-col items-center p-6 max-w-5xl mx-auto min-h-screen">
       <Suspense fallback={<div className="mt-12 text-green-500 animate-pulse font-medium tracking-widest uppercase text-xs">Loading Results...</div>}>
         <ResultsContent />
       </Suspense>

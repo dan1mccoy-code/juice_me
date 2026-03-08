@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import RecipeCard from '@/components/RecipeCard';
 
 const getIngredientData = async (name: string) => {
-  // 1. Find ingredient by name (case-insensitive)
   const { data: ingredient } = await supabase
     .from('ingredients')
     .select('id, name')
@@ -13,7 +13,6 @@ const getIngredientData = async (name: string) => {
 
   if (!ingredient) return null;
 
-  // 2. Get IDs of recipes that use this ingredient
   const { data: riRows } = await supabase
     .from('recipe_ingredients')
     .select('recipe_id')
@@ -22,7 +21,6 @@ const getIngredientData = async (name: string) => {
   const recipeIds = (riRows ?? []).map((r: any) => r.recipe_id);
   if (recipeIds.length === 0) return { ingredient, recipes: [] };
 
-  // 3. Fetch full recipe data + all their ingredients in one query
   const { data: recipes } = await supabase
     .from('recipes')
     .select(`
@@ -34,6 +32,8 @@ const getIngredientData = async (name: string) => {
     .in('id', recipeIds)
     .order('rating_count', { ascending: false });
 
+  const heroName = ingredient.name.toLowerCase();
+
   const shaped = (recipes ?? []).map((r: any) => ({
     id: r.id as string,
     title: r.title as string,
@@ -41,14 +41,14 @@ const getIngredientData = async (name: string) => {
     source_type: r.source_type as string,
     rating_count: Number(r.rating_count) || 0,
     rating_sum: Number(r.rating_sum) || 0,
-    category: r.category as string,
-    otherIngredients: (r.recipe_ingredients as any[])
+    ingredients: (r.recipe_ingredients as any[])
       ?.map((ri: any) => {
         const ing = Array.isArray(ri.ingredients) ? ri.ingredients[0] : ri.ingredients;
         return ing?.name as string | undefined;
       })
-      .filter((n): n is string => !!n && n.toLowerCase() !== ingredient.name.toLowerCase())
-      .sort() ?? [],
+      .filter((n): n is string => !!n)
+      .sort()
+      .map(name => ({ name, have: name.toLowerCase() === heroName })) ?? [],
   }));
 
   return { ingredient, recipes: shaped };
@@ -81,7 +81,7 @@ export default async function IngredientPage({ params }: { params: Promise<{ nam
   const display = ingredient.name.charAt(0).toUpperCase() + ingredient.name.slice(1);
 
   return (
-    <main className="flex flex-col items-center p-6 max-w-md mx-auto min-h-screen">
+    <main className="flex flex-col items-center p-6 max-w-5xl mx-auto min-h-screen">
       <div className="w-full mt-8 mb-8">
         <Link href="/ingredients" className="text-xs font-bold text-gray-400 hover:text-green-500 uppercase tracking-widest transition-colors">
           ← All Ingredients
@@ -98,51 +98,19 @@ export default async function IngredientPage({ params }: { params: Promise<{ nam
         </p>
       </div>
 
-      <div className="w-full space-y-4 mb-12">
-        {recipes.length > 0 ? recipes.map((recipe) => {
-          const avg = recipe.rating_count > 0
-            ? (recipe.rating_sum / recipe.rating_count).toFixed(1)
-            : '0.0';
-          return (
-            <Link
-              key={recipe.slug}
-              href={`/recipe/${recipe.slug}`}
-              className="block bg-white rounded-3xl p-5 shadow-sm border border-gray-100 hover:border-green-200 active:scale-[0.98] transition-all"
-            >
-              <div className="flex justify-between items-start mb-3">
-                <p className="font-bold text-gray-900 leading-tight pr-4">{recipe.title}</p>
-                <span className={`text-[10px] font-bold uppercase tracking-widest flex-shrink-0 ${recipe.source_type === 'human' ? 'text-blue-500' : 'text-purple-500'}`}>
-                  {recipe.source_type === 'human' ? '🧑‍🍳 Human' : '🤖 AI'}
-                </span>
-              </div>
-
-              {/* Other ingredient chips */}
-              {recipe.otherIngredients.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mb-3">
-                  <span className="text-[9px] font-bold uppercase tracking-widest text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
-                    {display}
-                  </span>
-                  {recipe.otherIngredients.map(ing => (
-                    <span key={ing} className="text-[9px] font-bold uppercase tracking-widest text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                      {ing}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-400 font-medium capitalize">{recipe.category}</span>
-                <div className="flex items-center gap-1">
-                  <span className="text-xs">⭐</span>
-                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                    {avg} ({recipe.rating_count})
-                  </span>
-                </div>
-              </div>
-            </Link>
-          );
-        }) : (
-          <p className="text-gray-400 text-sm text-center py-10">No recipes found for this ingredient yet.</p>
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
+        {recipes.length > 0 ? recipes.map((recipe) => (
+          <RecipeCard
+            key={recipe.slug}
+            title={recipe.title}
+            slug={recipe.slug}
+            source_type={recipe.source_type}
+            rating_count={recipe.rating_count}
+            rating_sum={recipe.rating_sum}
+            ingredients={recipe.ingredients}
+          />
+        )) : (
+          <p className="col-span-3 text-gray-400 text-sm text-center py-10">No recipes found for this ingredient yet.</p>
         )}
       </div>
     </main>

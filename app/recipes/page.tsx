@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import RecipeCard from '@/components/RecipeCard';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'All Juice Recipes',
@@ -16,23 +17,18 @@ export const metadata: Metadata = {
 
 const CATEGORIES = ['Green', 'Citrus', 'Root', 'Tropical', 'Wellness', 'Hydration', 'Energy'];
 
-const CATEGORY_COLORS: Record<string, string> = {
-  Green:     'bg-green-50 text-green-700 border-green-100',
-  Citrus:    'bg-yellow-50 text-yellow-700 border-yellow-100',
-  Root:      'bg-amber-50 text-amber-700 border-amber-100',
-  Tropical:  'bg-teal-50 text-teal-700 border-teal-100',
-  Wellness:  'bg-purple-50 text-purple-700 border-purple-100',
-  Hydration: 'bg-blue-50 text-blue-600 border-blue-100',
-  Energy:    'bg-orange-50 text-orange-700 border-orange-100',
-};
-
 export default async function RecipesPage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
   const { category } = await searchParams;
   const activeCategory = CATEGORIES.includes(category || '') ? category : undefined;
 
   let query = supabase
     .from('recipes')
-    .select('title, slug, source_type, rating_count, rating_sum, category')
+    .select(`
+      title, slug, source_type, rating_count, rating_sum, category,
+      recipe_ingredients(
+        ingredients(name)
+      )
+    `)
     .order('rating_count', { ascending: false });
 
   if (activeCategory) {
@@ -68,41 +64,31 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
         ))}
       </div>
 
-      {/* Recipe list */}
-      <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-12">
+      {/* Recipe grid */}
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
         {list.length > 0 ? list.map((r: any) => {
-          const avg = r.rating_count > 0 ? (r.rating_sum / r.rating_count).toFixed(1) : '0.0';
-          const catColor = CATEGORY_COLORS[r.category] ?? 'bg-gray-50 text-gray-500 border-gray-100';
+          const ingredients = (r.recipe_ingredients as any[] ?? [])
+            .map((ri: any) => {
+              const ing = Array.isArray(ri.ingredients) ? ri.ingredients[0] : ri.ingredients;
+              return ing?.name as string | undefined;
+            })
+            .filter((n): n is string => !!n)
+            .sort()
+            .map(name => ({ name }));
+
           return (
-            <Link
+            <RecipeCard
               key={r.slug}
-              href={`/recipe/${r.slug}`}
-              className="flex items-center justify-between bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:border-green-200 active:scale-[0.98] transition-all"
-            >
-              <div className="flex-1 min-w-0 pr-3">
-                <p className="font-bold text-gray-900 text-sm leading-tight mb-2 line-clamp-1">{r.title}</p>
-                <div className="flex items-center gap-2 flex-wrap">
-                  {r.category && (
-                    <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${catColor}`}>
-                      {r.category}
-                    </span>
-                  )}
-                  <span className={`text-[9px] font-bold uppercase tracking-widest ${r.source_type === 'human' ? 'text-blue-500' : 'text-purple-500'}`}>
-                    {r.source_type === 'human' ? '🧑‍🍳 Human' : '🤖 AI'}
-                  </span>
-                  <span className="text-[10px] text-gray-400 font-bold">⭐ {avg} ({r.rating_count})</span>
-                </div>
-              </div>
-              {r.rating_count > 5 && (
-                <span className="flex-shrink-0 bg-orange-500 text-white text-[8px] font-black px-2 py-1 rounded-full tracking-widest uppercase mr-2">
-                  HOT
-                </span>
-              )}
-              <span className="text-gray-300 font-bold flex-shrink-0">→</span>
-            </Link>
+              title={r.title}
+              slug={r.slug}
+              source_type={r.source_type}
+              rating_count={r.rating_count}
+              rating_sum={r.rating_sum}
+              ingredients={ingredients}
+            />
           );
         }) : (
-          <p className="text-gray-400 text-sm text-center py-10">No recipes in this category yet.</p>
+          <p className="col-span-3 text-gray-400 text-sm text-center py-10">No recipes in this category yet.</p>
         )}
       </div>
     </main>
