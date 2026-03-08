@@ -131,13 +131,19 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
     'recipeYield': '1 serving',
     'keywords': recipe.ingredients.map(i => i.name).join(', '),
     'recipeIngredient': recipe.ingredients.map(i => `${i.quantity_display} ${i.name}`.trim()),
-    'recipeInstructions': recipe.instructions.map((step, i) => ({
-      '@type': 'HowToStep',
-      'position': i + 1,
-      'name': `Step ${i + 1}`,
-      'text': step,
-      'url': `https://juiceme.app/recipe/${slug}#step-${i + 1}`,
-    })),
+    'recipeInstructions': recipe.instructions.map((step, i) => {
+      const firstSentence = step.split(/[.!?]/)[0].trim();
+      const name = firstSentence.length > 60
+        ? firstSentence.slice(0, 57).trimEnd() + '...'
+        : firstSentence;
+      return {
+        '@type': 'HowToStep',
+        'position': i + 1,
+        'name': name || `Step ${i + 1}`,
+        'text': step,
+        'url': `https://juiceme.app/recipe/${slug}#step-${i + 1}`,
+      };
+    }),
     ...(recipe.rating_count > 0 && {
       'aggregateRating': {
         '@type': 'AggregateRating',
