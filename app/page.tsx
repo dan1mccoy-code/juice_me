@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import RecipeCard, { type CardIngredient } from '@/components/RecipeCard';
 
 interface TrendingRecipe {
   title: string;
@@ -10,6 +11,7 @@ interface TrendingRecipe {
   source_type: string;
   rating_count: number;
   rating_sum: number;
+  ingredients: CardIngredient[];
 }
 
 export default function Home() {
@@ -21,12 +23,26 @@ export default function Home() {
       try {
         const { data, error } = await supabase
           .from('recipes')
-          .select('title, slug, source_type, rating_count, rating_sum')
-          .order('rating_count', { ascending: false }) 
+          .select('title, slug, source_type, rating_count, rating_sum, recipe_ingredients(ingredients(name))')
+          .order('rating_count', { ascending: false })
           .limit(6);
-        
+
         if (error) throw error;
-        if (data) setTrending(data);
+        if (data) setTrending(data.map((r: any) => ({
+          title: r.title,
+          slug: r.slug,
+          source_type: r.source_type,
+          rating_count: r.rating_count,
+          rating_sum: r.rating_sum,
+          ingredients: (r.recipe_ingredients as any[] ?? [])
+            .map((ri: any) => {
+              const ing = Array.isArray(ri.ingredients) ? ri.ingredients[0] : ri.ingredients;
+              return ing?.name as string | undefined;
+            })
+            .filter((n): n is string => !!n)
+            .sort()
+            .map(name => ({ name })),
+        })));
       } catch (err) {
         console.error("Error fetching trending juices:", err);
       } finally {
@@ -70,50 +86,23 @@ export default function Home() {
           🔥 Trending This Week
         </h2>
         
-        <div className="flex gap-4 overflow-x-auto pb-6 no-scrollbar snap-x md:grid md:grid-cols-3 md:overflow-x-visible md:pb-0">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {loading ? (
-            [1, 2, 3].map((i) => (
-              <div key={i} className="min-w-[220px] md:min-w-0 h-36 bg-gray-50 rounded-3xl animate-pulse border border-gray-100" />
+            [1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="h-36 bg-gray-50 rounded-3xl animate-pulse border border-gray-100" />
             ))
           ) : trending.length > 0 ? (
-            trending.map((recipe) => {
-              const avgRating = recipe.rating_count > 0
-                ? (recipe.rating_sum / recipe.rating_count).toFixed(1)
-                : "0.0";
-
-              return (
-                <Link
-                  href={`/recipe/${recipe.slug}`}
-                  key={recipe.slug}
-                  className="relative min-w-[220px] md:min-w-0 bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6 flex flex-col justify-between snap-start active:scale-95 transition-all hover:border-green-200"
-                >
-                  {recipe.rating_count > 5 && (
-                    <span className="absolute -top-2 -right-1 bg-orange-500 text-white text-[8px] font-black px-2 py-1 rounded-full shadow-md tracking-widest uppercase">
-                      HOT
-                    </span>
-                  )}
-
-                  <div>
-                    <p className="font-bold text-lg leading-tight mb-2 line-clamp-2">
-                      {recipe.title}
-                    </p>
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs">⭐</span>
-                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                        {avgRating} ({recipe.rating_count})
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center mt-4">
-                    <span className={`text-[10px] font-bold uppercase tracking-widest ${recipe.source_type === 'human' ? 'text-blue-500' : 'text-purple-500'}`}>
-                      {recipe.source_type === 'human' ? '🧑‍🍳 Human' : '🤖 AI'}
-                    </span>
-                    <span className="text-gray-200 font-bold">→</span>
-                  </div>
-                </Link>
-              );
-            })
+            trending.map((recipe) => (
+              <RecipeCard
+                key={recipe.slug}
+                title={recipe.title}
+                slug={recipe.slug}
+                source_type={recipe.source_type}
+                rating_count={recipe.rating_count}
+                rating_sum={recipe.rating_sum}
+                ingredients={recipe.ingredients}
+              />
+            ))
           ) : (
             <div className="col-span-3 w-full py-10 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
               <p className="text-gray-400 text-sm">No trending juices yet!</p>
