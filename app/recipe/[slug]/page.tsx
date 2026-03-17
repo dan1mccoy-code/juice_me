@@ -226,6 +226,21 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
         </ul>
       </div>
 
+      {/* Instructions */}
+      <div className="w-full bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
+        <h2 className="text-lg font-bold text-gray-800 mb-4">Instructions</h2>
+        <div className="space-y-6">
+          {recipe.instructions.map((step, i) => (
+            <div key={i} id={`step-${i + 1}`} className="flex gap-4">
+              <span className="flex-shrink-0 w-7 h-7 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm">
+                {i + 1}
+              </span>
+              <p className="text-gray-600 leading-relaxed pt-0.5">{step}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Other Blends */}
       {similarRecipes.length > 0 && (
         <div className="w-full mb-6">
@@ -267,21 +282,6 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
           </div>
         </div>
       )}
-
-      {/* Instructions */}
-      <div className="w-full bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-4">Instructions</h2>
-        <div className="space-y-6">
-          {recipe.instructions.map((step, i) => (
-            <div key={i} id={`step-${i + 1}`} className="flex gap-4">
-              <span className="flex-shrink-0 w-7 h-7 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm">
-                {i + 1}
-              </span>
-              <p className="text-gray-600 leading-relaxed pt-0.5">{step}</p>
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* Nutrition Snapshot */}
       {recipe.nutrition_perks.length > 0 && (
