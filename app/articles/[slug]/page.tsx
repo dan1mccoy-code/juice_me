@@ -98,6 +98,14 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           priority
         />
       </div>
+      <p className="text-[10px] text-gray-400 text-right w-full px-4 pt-1">
+        Photo by{' '}
+        <a href={article.heroPhotographer.url} target="_blank" rel="noopener noreferrer"
+           className="underline hover:text-gray-600">
+          {article.heroPhotographer.name}
+        </a>
+        {' '}on Unsplash
+      </p>
 
       <div className="w-full px-6 pb-12">
         {/* Header */}
