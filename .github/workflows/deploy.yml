@@ -27,3 +27,10 @@ jobs:
 
       - name: Deploy
         run: npx wrangler deploy
+
+      - name: Notify IndexNow
+        run: |
+          sleep 10
+          curl -s -o /dev/null -w "%{http_code}" -X POST https://juiceme.app/api/indexnow \
+            -H "Authorization: Bearer ${{ secrets.INDEXNOW_SUBMIT_TOKEN }}" \
+            -H "Content-Type: application/json"
