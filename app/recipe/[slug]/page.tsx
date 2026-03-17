@@ -7,6 +7,16 @@ import { notFound } from 'next/navigation';
 import AdUnit from '@/components/AdUnit';
 import { getArticlesForRecipe } from '@/content/articles';
 
+const PAIRING_BY_CATEGORY: Record<string, string> = {
+  Green: 'a slice of avocado toast or a handful of mixed seeds',
+  Citrus: 'a handful of mixed nuts or a piece of whole-grain toast',
+  Root: 'a hard-boiled egg or a small bowl of oatmeal',
+  Tropical: 'coconut yogurt with granola or a piece of fresh fruit',
+  Wellness: 'a light protein snack such as almonds or a boiled egg',
+  Hydration: 'cucumber slices with hummus or a light green salad',
+  Energy: 'a banana or energy bar 30 minutes before exercise',
+};
+
 const GET_RECIPE_TAGS = (ingredients: string[]) => {
   const boostMap = [
     { name: 'Immunity', icon: '🛡️', trigger: 'Turmeric', color: 'bg-amber-50 text-amber-700 border-amber-100' },
@@ -30,6 +40,7 @@ const getRecipe = cache(async (slug: string) => {
       source_type,
       rating_count,
       rating_sum,
+      nutrition_perks,
       recipe_ingredients (
         quantity_display,
         ingredients (
@@ -51,6 +62,7 @@ const getRecipe = cache(async (slug: string) => {
     source_type: data.source_type as string,
     rating_count: Number(data.rating_count) || 0,
     rating_sum: Number(data.rating_sum) || 0,
+    nutrition_perks: Array.isArray((data as any).nutrition_perks) ? (data as any).nutrition_perks as string[] : [],
     ingredients: (data.recipe_ingredients as any[])?.map((ri) => {
       const ing = Array.isArray(ri.ingredients) ? ri.ingredients[0] : ri.ingredients;
       return {
@@ -168,11 +180,13 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
           {recipe.title}
         </h1>
 
-        {recipe.description && (
-          <p className="text-gray-600 text-sm leading-relaxed mb-4">{recipe.description}</p>
-        )}
+        <StarRating
+          recipeId={recipe.id}
+          initialRating={avgRating}
+          totalRatings={recipe.rating_count}
+        />
 
-        <div className="flex flex-wrap items-center gap-2 mb-6">
+        <div className="flex flex-wrap items-center gap-2 mt-4 mb-4">
           <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full border flex items-center gap-1 ${
             recipe.source_type === 'human'
               ? 'bg-blue-50 text-blue-600 border-blue-100'
@@ -188,16 +202,14 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
           ))}
         </div>
 
-        <StarRating
-          recipeId={recipe.id}
-          initialRating={avgRating}
-          totalRatings={recipe.rating_count}
-        />
+        {recipe.description && (
+          <p className="text-gray-600 text-base leading-relaxed">{recipe.description}</p>
+        )}
       </div>
 
       {/* Ingredients */}
       <div className="w-full bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
-        <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4 italic">Ingredients</h2>
+        <h2 className="text-lg font-bold text-gray-800 mb-4">Ingredients</h2>
         <ul className="space-y-4">
           {recipe.ingredients.length > 0 ? (
             recipe.ingredients.map((ing, i) => (
@@ -258,7 +270,7 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
 
       {/* Instructions */}
       <div className="w-full bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
-        <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4 italic">Instructions</h2>
+        <h2 className="text-lg font-bold text-gray-800 mb-4">Instructions</h2>
         <div className="space-y-6">
           {recipe.instructions.map((step, i) => (
             <div key={i} id={`step-${i + 1}`} className="flex gap-4">
@@ -268,6 +280,42 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
               <p className="text-gray-600 leading-relaxed pt-0.5">{step}</p>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Nutrition Snapshot */}
+      {recipe.nutrition_perks.length > 0 && (
+        <div className="w-full bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
+          <h2 className="text-lg font-bold text-gray-800 mb-1">Nutrition Snapshot</h2>
+          <p className="text-xs text-gray-400 mb-4">Key compounds & what they do</p>
+          <ul className="space-y-3">
+            {recipe.nutrition_perks.map((perk, i) => {
+              const [label, benefit] = perk.split(' — ');
+              return (
+                <li key={i} className="flex gap-3 items-start">
+                  <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-green-400 mt-2" />
+                  <span className="text-sm text-gray-700 leading-snug">
+                    <span className="font-semibold text-gray-900">{label}</span>
+                    {benefit ? ` — ${benefit}` : ''}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+      {/* Storage & Serving */}
+      <div className="w-full bg-amber-50 rounded-3xl p-6 border border-amber-100 mb-6">
+        <h2 className="text-lg font-bold text-gray-800 mb-3">Storage & Serving</h2>
+        <p className="text-sm text-gray-600 leading-relaxed mb-4">
+          Best enjoyed immediately for peak freshness and nutrients. Store leftovers in an airtight glass jar in the fridge for up to 24 hours — shake or stir well before drinking as natural separation occurs. Avoid plastic containers, which can absorb flavors and accelerate oxidation.
+        </p>
+        <div className="flex items-start gap-2">
+          <span className="text-sm font-bold text-amber-700 whitespace-nowrap">Pair with:</span>
+          <span className="text-sm text-gray-600">
+            {PAIRING_BY_CATEGORY[recipe.category] ?? 'a light protein snack or handful of nuts'}
+          </span>
         </div>
       </div>
 
