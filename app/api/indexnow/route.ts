@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { articles } from '@/content/articles';
 
 const BASE_URL = 'https://juiceme.app';
-const INDEXNOW_KEY = '7f3e8b4a2c9d5e1f6a0b3c8d7e2f4a9b';
+const INDEXNOW_KEY = '4ac67cde0148d7ac49d88af833e4138f';
 
 export async function POST(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
