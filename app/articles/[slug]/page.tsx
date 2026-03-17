@@ -81,7 +81,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   };
 
   return (
-    <main className="flex flex-col items-center max-w-md mx-auto min-h-screen">
+    <main className="flex flex-col items-center max-w-md md:max-w-2xl mx-auto min-h-screen">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
