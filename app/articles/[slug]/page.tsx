@@ -53,38 +53,54 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     relatedRecipes = data ?? [];
   }
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline: article.title,
-    description: article.description,
-    image: article.heroImage,
-    datePublished: article.publishedAt,
-    author: {
-      '@type': 'Organization',
-      name: 'JuiceMe',
-      url: 'https://juiceme.app',
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'JuiceMe',
-      url: 'https://juiceme.app',
-      logo: {
-        '@type': 'ImageObject',
-        url: 'https://juiceme.app/og-juice.jpg',
+  const jsonLd = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: article.title,
+      description: article.description,
+      image: article.heroImage,
+      datePublished: article.publishedAt,
+      dateModified: article.publishedAt,
+      author: {
+        '@type': 'Organization',
+        name: 'JuiceMe',
+        url: 'https://juiceme.app',
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: 'JuiceMe',
+        url: 'https://juiceme.app',
+        logo: {
+          '@type': 'ImageObject',
+          url: 'https://juiceme.app/og-juice.jpg',
+        },
+      },
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': `https://juiceme.app/articles/${slug}`,
       },
     },
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': `https://juiceme.app/articles/${slug}`,
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://juiceme.app' },
+        { '@type': 'ListItem', position: 2, name: 'Articles', item: 'https://juiceme.app/articles' },
+        { '@type': 'ListItem', position: 3, name: article.title, item: `https://juiceme.app/articles/${slug}` },
+      ],
     },
-  };
+  ];
 
   return (
     <main className="flex flex-col items-center max-w-md md:max-w-2xl mx-auto min-h-screen">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd[0]) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd[1]) }}
       />
 
       {/* Hero Image */}
