@@ -30,7 +30,16 @@ jobs:
 
       - name: Notify IndexNow
         run: |
-          sleep 10
-          curl -s -o /dev/null -w "%{http_code}" -X POST https://juiceme.app/api/indexnow \
-            -H "Authorization: Bearer ${{ secrets.INDEXNOW_SUBMIT_TOKEN }}" \
-            -H "Content-Type: application/json"
+          echo "Waiting for deployment to propagate..."
+          for i in $(seq 1 12); do
+            sleep 5
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://juiceme.app/4ac67cde0148d7ac49d88af833e4138f.txt)
+            echo "Key file status: $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "Key file live, submitting to IndexNow..."
+              curl -s -X POST https://juiceme.app/api/indexnow \
+                -H "Authorization: Bearer ${{ secrets.INDEXNOW_SUBMIT_TOKEN }}" \
+                -H "Content-Type: application/json"
+              break
+            fi
+          done
