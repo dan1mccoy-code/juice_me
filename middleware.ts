@@ -13,7 +13,7 @@ export function middleware(request: NextRequest) {
     const canonical = new URL(request.url);
     canonical.protocol = 'https:';
     canonical.host = host.replace(/^www\./, '');
-    return NextResponse.redirect(canonical, { status: 301 });
+    return NextResponse.redirect(canonical, { status: 308 });
   }
 
   return NextResponse.next();

@@ -7,6 +7,72 @@ import { notFound } from 'next/navigation';
 import AdUnit from '@/components/AdUnit';
 import { getArticlesForRecipe } from '@/content/articles';
 
+const SUBSTITUTIONS_BY_CATEGORY: Record<string, { tips: string[]; swap: string }> = {
+  Green: {
+    tips: [
+      'Swap kale for spinach or romaine for a milder flavour.',
+      'Add a green apple to balance bitterness with natural sweetness.',
+      'A knob of fresh ginger lifts the earthy notes and aids digestion.',
+      'Try adding a quarter avocado for extra creaminess and healthy fats.',
+    ],
+    swap: 'No juicer? Blend with a cup of coconut water and strain through a fine mesh sieve.',
+  },
+  Citrus: {
+    tips: [
+      'Replace lemon with lime for a sharper, more tropical tang.',
+      'Add a small piece of turmeric root for anti-inflammatory benefits.',
+      'A teaspoon of raw honey balances acidity without refined sugar.',
+      'Blood orange is a great seasonal swap for extra antioxidant colour.',
+    ],
+    swap: 'No juicer? Blend peeled segments with water and strain through cheesecloth.',
+  },
+  Root: {
+    tips: [
+      'Swap beet for red cabbage for a similar colour with milder earthiness.',
+      'Add an apple to mellow the intensity of strong root vegetables.',
+      'Fresh ginger or horseradish adds a warming kick to root blends.',
+      'A squeeze of lemon brightens the juice and slows oxidation.',
+    ],
+    swap: 'No juicer? Grate roots finely and press through a nut-milk bag.',
+  },
+  Tropical: {
+    tips: [
+      'Use frozen mango or pineapple when fresh is out of season.',
+      'Coconut water instead of plain water adds natural electrolytes.',
+      'A pinch of chilli powder gives a surprising depth to tropical flavours.',
+      'Papaya is an excellent swap for mango — similar sweetness, smoother texture.',
+    ],
+    swap: 'No juicer? Blend and strain; tropical fruits blend especially well.',
+  },
+  Wellness: {
+    tips: [
+      'Increase turmeric or ginger dosage slightly for a stronger therapeutic effect.',
+      'Black pepper enhances curcumin absorption — add a small pinch.',
+      'Raw manuka honey is a premium swap if you want added antimicrobial benefits.',
+      'Elderflower or echinacea tincture can be stirred in for extra immune support.',
+    ],
+    swap: 'Can\'t find fresh turmeric? Use ¼ tsp ground turmeric powder as a substitute.',
+  },
+  Hydration: {
+    tips: [
+      'Add a pinch of Himalayan pink salt to replace electrolytes lost during exercise.',
+      'Aloe vera juice (2 tbsp) can be stirred in for extra gut hydration.',
+      'Swap cucumber for zucchini — equally hydrating, very mild flavour.',
+      'Watermelon rind is edible and juices well — don\'t waste it.',
+    ],
+    swap: 'No juicer? High-water fruits and vegetables blend and strain easily with minimal waste.',
+  },
+  Energy: {
+    tips: [
+      'Add a shot of wheatgrass for a concentrated chlorophyll and iron boost.',
+      'A tablespoon of chia seeds stirred in adds sustained energy from healthy fats.',
+      'Maca powder (1 tsp) is a natural adaptogen that supports stamina.',
+      'Replace apple with pear for a lower-sugar, equally energising base.',
+    ],
+    swap: 'Drink 20–30 minutes before a workout for peak energy-boosting effect.',
+  },
+};
+
 const PAIRING_BY_CATEGORY: Record<string, string> = {
   Green: 'a slice of avocado toast or a handful of mixed seeds',
   Citrus: 'a handful of mixed nuts or a piece of whole-grain toast',

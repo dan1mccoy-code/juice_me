@@ -4,6 +4,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'About',
   description: 'JuiceMe was built to help you figure out what to grab from the produce section to make a great juice.',
+  alternates: { canonical: '/about' },
 };
 
 export default function AboutPage() {
